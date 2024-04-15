@@ -1,15 +1,10 @@
 import json
 import re
-from operator import attrgetter, itemgetter
+from operator import itemgetter
 from typing import Union, List
 import pandas as pd
 
-from langchain_community.document_loaders import GutenbergLoader
-from langchain_core.documents import Document
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
-from langchain_community.vectorstores.utils import DistanceStrategy
-from langchain_core.embeddings import Embeddings
+
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import PromptTemplate
