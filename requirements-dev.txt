@@ -1,0 +1,5 @@
+pyspark
+black
+ipython
+pandas
+mlflow

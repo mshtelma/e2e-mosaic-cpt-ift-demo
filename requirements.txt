@@ -1,0 +1,9 @@
+langchain
+langchain-community
+langchain_text_splitters
+transformers
+mosaicml_cli
+unstructured[pdf,docx]
+requests-toolbelt
+mosaicml-streaming
+mlflow[genai,databricks]
