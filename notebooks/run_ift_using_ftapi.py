@@ -21,6 +21,10 @@ SUPPORTED_INPUT_MODELS = [
     "mosaicml/mpt-7b-8k",
     "mosaicml/mpt-30b-instruct",
     "mosaicml/mpt-7b-8k-instruct",
+    "mistralai/Mistral-7B-Instruct-v0.2",
+    "mistralai/Mistral-7B-v0.1",
+    "mistralai/Mixtral-8x7B-v0.1",
+    "mistralai/Mixtral-8x7B-Instruct-v0.1",
     "meta-llama/Llama-2-7b-chat-hf",
     "meta-llama/Llama-2-13b-chat-hf",
     "meta-llama/Llama-2-70b-chat-hf",
@@ -45,7 +49,7 @@ get_dbutils().widgets.text("training_duration", "10ba", "training_duration")
 get_dbutils().widgets.text("learning_rate", "1e-6", "learning_rate")
 get_dbutils().widgets.text(
     "custom_weights_path",
-    "dbfs:/databricks/mlflow-tracking/2980594535026525/4364d810d4804eaa81257257c353c3ae/artifacts/contd-pretrain-llama-2-7b-hf-s0hwaj/checkpoints/ep2-ba20",
+    "",
     "custom_weights_path",
 )
 
