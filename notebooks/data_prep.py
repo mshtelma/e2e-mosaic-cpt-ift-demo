@@ -18,8 +18,7 @@ splitted_df = split(
 display(splitted_df)
 # COMMAND ----------
 
-splitted_df.write.mode("overwrite").saveAsTable("msh.finreg.splitted_documents")
-
+splitted_df.write.mode("overwrite").saveAsTable("msh.finreg.splitted_docume
 
 # COMMAND ----------
 cpt_df = get_spark().read.table("msh.finreg.splitted_documents")

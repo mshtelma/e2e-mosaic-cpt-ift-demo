@@ -1,3 +1,5 @@
+huggingface
+datasets
 langchain
 langchain-community
 langchain_text_splitters

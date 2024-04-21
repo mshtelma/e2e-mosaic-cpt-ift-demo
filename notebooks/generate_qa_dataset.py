@@ -4,11 +4,15 @@
 # COMMAND ----------
 import os
 from langchain_community.chat_models.databricks import ChatDatabricks
+from pyspark.sql.functions import rand
 
 from finreganalytics.dataprep.qagen import build_qa_eval_dataset
 from finreganalytics.utils import get_spark
 from finreganalytics.dataprep import store_as_mds, store_as_jsonl
-from finreganalytics.dataprep.ift_data_prep import prepare_ift_dataset
+from finreganalytics.dataprep.ift_data_prep import (
+    prepare_ift_dataset,
+    load_huggingface_dataset,
+)
 
 try:
     context = dbutils.entry_point.getDbutils().notebook().getContext()  # noqa
@@ -95,11 +99,36 @@ ift_train_df.write.mode("overwrite").saveAsTable("msh.finreg.qa_dataset_train")
 ift_val_df.write.mode("overwrite").saveAsTable("msh.finreg.qa_dataset_val")
 # COMMAND ----------
 
+
 ift_completions_train_df = prepare_ift_dataset("msh.finreg.qa_dataset_train", limit=-1)
 ift_completions_val_df = prepare_ift_dataset("msh.finreg.qa_dataset_val", limit=-1)
 
 # COMMAND ----------
+instruct_train_df = load_huggingface_dataset("mosaicml/instruct-v3", split="train")
+instruct_train_df = prepare_ift_dataset(
+    spark_df=instruct_train_df,
+    apply_prompt_formatting=False,
+    question_col="prompt",
+    response_col="response",
+)
 
+instruct_val_df = load_huggingface_dataset("mosaicml/instruct-v3", split="test")
+instruct_val_df = prepare_ift_dataset(
+    spark_df=instruct_val_df,
+    apply_prompt_formatting=False,
+    question_col="prompt",
+    response_col="response",
+)
+
+ift_completions_train_df = (
+    ift_completions_train_df.union(instruct_train_df).orderBy(rand()).repartition(8)
+)
+ift_completions_val_df = (
+    ift_completions_val_df.union(instruct_val_df).orderBy(rand()).repartition(8)
+)
+
+display(ift_completions_val_df)  # noqa
+# COMMAND ----------
 store_as_mds(ift_completions_train_df, os.path.join(mds_data_path, "train"))
 store_as_jsonl(ift_completions_train_df, os.path.join(jsonl_data_path, "train.jsonl"))
 

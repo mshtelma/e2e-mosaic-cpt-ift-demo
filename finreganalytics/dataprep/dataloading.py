@@ -3,28 +3,13 @@ import re
 import io
 from typing import Iterator, List
 import pandas as pd
-from langchain_community.document_loaders import GutenbergLoader
 from langchain_core.documents import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
-from langchain_community.vectorstores.utils import DistanceStrategy
-from langchain_core.embeddings import Embeddings
-from langchain_core.language_models import BaseLanguageModel
-from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import (
-    RunnableParallel,
-    RunnablePassthrough,
-    RunnableLambda,
-)
-from langchain_core.vectorstores import VectorStore
 from langchain_text_splitters import TextSplitter
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col, explode
 from pyspark.sql.pandas.functions import pandas_udf
 from transformers import AutoTokenizer
-from langchain.prompts import PromptTemplate
-from langchain.chat_models import ChatDatabricks
-from langchain.embeddings import DatabricksEmbeddings
 from unstructured.partition.pdf import partition_pdf
 
 from finreganalytics.utils import get_spark
@@ -73,10 +58,13 @@ def split(df: DataFrame, hf_tokenizer_name: str, chunk_size: int) -> DataFrame:
     """
 
     def split(text: str, splitter: TextSplitter) -> List[str]:
-        return [
-            doc.page_content
-            for doc in splitter.split_documents([Document(page_content=text)])
-        ]
+        if len(text) > 750:
+            return [
+                doc.page_content
+                for doc in splitter.split_documents([Document(page_content=text)])
+            ]
+        else:
+            return [text]
 
     @pandas_udf("array<string>")
     def split_udf(batch_iter: Iterator[pd.Series]) -> Iterator[pd.Series]:
