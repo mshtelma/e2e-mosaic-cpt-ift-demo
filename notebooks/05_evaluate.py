@@ -1,7 +1,9 @@
 # Databricks notebook source
 # MAGIC %pip install -r ../requirements.txt
 # MAGIC dbutils.library.restartPython()
+
 # COMMAND ----------
+
 from langchain_community.chat_models.databricks import ChatDatabricks
 from langchain_core.language_models import BaseLanguageModel
 from langchain_core.output_parsers import StrOutputParser
@@ -32,6 +34,7 @@ def build_retrievalqa_with_context_chain(
 
 
 # COMMAND ----------
+
 QA_TEMPLATE_ZEROSHOT = """
 You are a Regulatory Reporting Assistant. 
 Please answer the question as precise as possible.  
@@ -61,13 +64,17 @@ Please answer the question using the given context:
 
 ### Response:
 """
+
 # COMMAND ----------
+
 llm_mistral = ChatDatabricks(endpoint="mistral7b", temperature=0.1)
 qa_chain_zeroshot = build_retrievalqa_zeroshot_chain(QA_TEMPLATE_ZEROSHOT, llm_mistral)
 qa_chain_with_ctx = build_retrievalqa_with_context_chain(
     QA_TEMPLATE_WITH_CTX, llm_mistral
 )
+
 # COMMAND ----------
+
 from pyspark.sql.functions import col
 
 val_qa_eval_pdf = pd.read_json(
@@ -85,6 +92,7 @@ val_qa_eval_sdf = (
 )
 val_qa_eval_df = val_qa_eval_sdf.toPandas()
 display(val_qa_eval_df)  # noqa
+
 # COMMAND ----------
 
 eval_results = evaluate_qa_chain(
@@ -95,6 +103,7 @@ eval_results = evaluate_qa_chain(
 )
 print(f"See evaluation metrics below: \n{eval_results.metrics}")
 display(eval_results.tables["eval_results_table"])  # noqa
+
 # COMMAND ----------
 
 eval_results = evaluate_qa_chain(
@@ -105,12 +114,15 @@ eval_results = evaluate_qa_chain(
 )
 print(f"See evaluation metrics below: \n{eval_results.metrics}")
 display(eval_results.tables["eval_results_table"])  # noqa
+
 # COMMAND ----------
+
 llm_mistral = ChatDatabricks(endpoint="crr_mistral_ift_v1", temperature=0.1)
 qa_chain_zeroshot = build_retrievalqa_zeroshot_chain(QA_TEMPLATE_ZEROSHOT, llm_mistral)
 qa_chain_with_ctx = build_retrievalqa_with_context_chain(
     QA_TEMPLATE_WITH_CTX, llm_mistral
 )
+
 # COMMAND ----------
 
 eval_results = evaluate_qa_chain(
@@ -121,6 +133,7 @@ eval_results = evaluate_qa_chain(
 )
 print(f"See evaluation metrics below: \n{eval_results.metrics}")
 display(eval_results.tables["eval_results_table"])  # noqa
+
 # COMMAND ----------
 
 eval_results = evaluate_qa_chain(

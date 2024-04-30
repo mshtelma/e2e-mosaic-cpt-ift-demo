@@ -1,7 +1,9 @@
 # Databricks notebook source
 # MAGIC %pip install -r ../requirements.txt
 # MAGIC dbutils.library.restartPython()
+
 # COMMAND ----------
+
 import os
 from langchain_community.chat_models.databricks import ChatDatabricks
 from pyspark.sql.functions import rand
@@ -20,11 +22,13 @@ try:
     os.environ["DATABRICKS_TOKEN"] = context.apiUrl().get()
 except:
     pass
+
 # COMMAND ----------
 
 
-chunks_df = get_spark().read.table("msh.finreg.splitted_documents")
+chunks_df = get_spark().read.table("main.finreg.splitted_documents")
 chunks = chunks_df.toPandas()["text"].values.tolist()
+
 # COMMAND ----------
 
 llm_dbrx = ChatDatabricks(endpoint="databricks-dbrx-instruct", temperature=0.1)
@@ -73,7 +77,9 @@ Question: {question}
 
 Answer:
 """
+
 # COMMAND ----------
+
 qa_questions_df = build_qa_eval_dataset(
     chunks,
     llm_dbrx,
@@ -83,27 +89,37 @@ qa_questions_df = build_qa_eval_dataset(
 )
 
 display(qa_questions_df)  # noqa
+
 # COMMAND ----------
+
 get_spark().createDataFrame(qa_questions_df).write.mode("overwrite").saveAsTable(
-    "msh.finreg.qa_dataset"
+    "main.finreg.qa_dataset"
 )
+
 # COMMAND ----------
-mds_data_path = "/Volumes/msh/finreg/training/ift/mds/"
-jsonl_data_path = "/Volumes/msh/finreg/training/ift/jsonl/"
+
+# MAGIC %sql select count(*) from main.finreg.qa_dataset;
+
+# COMMAND ----------
+
+mds_data_path = "/Volumes/main/finreg/training/ift/mds/"
+jsonl_data_path = "/Volumes/main/finreg/training/ift/jsonl/"
 
 
 ift_train_df, ift_val_df = (
-    get_spark().table("msh.finreg.qa_dataset").randomSplit([0.99, 0.01])
+    get_spark().table("main.finreg.qa_dataset").randomSplit([0.99, 0.01])
 )
-ift_train_df.write.mode("overwrite").saveAsTable("msh.finreg.qa_dataset_train")
-ift_val_df.write.mode("overwrite").saveAsTable("msh.finreg.qa_dataset_val")
-# COMMAND ----------
-
-
-ift_completions_train_df = prepare_ift_dataset("msh.finreg.qa_dataset_train", limit=-1)
-ift_completions_val_df = prepare_ift_dataset("msh.finreg.qa_dataset_val", limit=-1)
+ift_train_df.write.mode("overwrite").saveAsTable("main.finreg.qa_dataset_train")
+ift_val_df.write.mode("overwrite").saveAsTable("main.finreg.qa_dataset_val")
 
 # COMMAND ----------
+
+
+ift_completions_train_df = prepare_ift_dataset("main.finreg.qa_dataset_train", limit=-1)
+ift_completions_val_df = prepare_ift_dataset("main.finreg.qa_dataset_val", limit=-1)
+
+# COMMAND ----------
+
 instruct_train_df = load_huggingface_dataset("mosaicml/instruct-v3", split="train")
 instruct_train_df = prepare_ift_dataset(
     spark_df=instruct_train_df,
@@ -128,7 +144,9 @@ ift_completions_val_df = (
 )
 
 display(ift_completions_val_df)  # noqa
+
 # COMMAND ----------
+
 store_as_mds(ift_completions_train_df, os.path.join(mds_data_path, "train"))
 store_as_jsonl(ift_completions_train_df, os.path.join(jsonl_data_path, "train.jsonl"))
 
