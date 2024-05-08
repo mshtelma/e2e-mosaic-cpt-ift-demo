@@ -9,3 +9,4 @@ unstructured[pdf,docx]
 requests-toolbelt
 mosaicml-streaming
 mlflow[genai,databricks]
+databricks-genai

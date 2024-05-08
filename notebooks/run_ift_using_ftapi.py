@@ -3,6 +3,19 @@
 
 # COMMAND ----------
 
+# MAGIC %pip install databricks-genai --upgrade
+
+# COMMAND ----------
+
+dbutils.library.restartPython()
+
+
+# COMMAND ----------
+
+# MAGIC %run ./_config
+
+# COMMAND ----------
+
 # MAGIC %load_ext autoreload
 # MAGIC %autoreload 2
 # MAGIC
@@ -10,7 +23,6 @@
 # COMMAND ----------
 
 import os.path
-import mcli
 
 from finreganalytics.utils import setup_logging, get_dbutils
 
@@ -42,7 +54,7 @@ get_dbutils().widgets.combobox(
     "base_model", "meta-llama/Llama-2-7b-hf", SUPPORTED_INPUT_MODELS, "base_model"
 )
 get_dbutils().widgets.text(
-    "data_path", "/Volumes/msh/finreg/training/ift/jsonl", "data_path"
+    "train_data_path", f"{data_path}/training/ift/jsonl/train.jsonl", "train_data_path"
 )
 
 get_dbutils().widgets.text("training_duration", "10ba", "training_duration")
@@ -56,7 +68,7 @@ get_dbutils().widgets.text(
 # COMMAND ----------
 
 base_model = get_dbutils().widgets.get("base_model")
-data_path = get_dbutils().widgets.get("data_path")
+train_data_path = get_dbutils().widgets.get("train_data_path")
 training_duration = get_dbutils().widgets.get("training_duration")
 learning_rate = get_dbutils().widgets.get("learning_rate")
 custom_weights_path = get_dbutils().widgets.get("custom_weights_path")
@@ -65,35 +77,31 @@ if len(custom_weights_path) < 1:
 
 # COMMAND ----------
 
-mcli.initialize(api_key=get_dbutils().secrets.get(scope="msh", key="mosaic-token"))
+custom_weights_path
 
 # COMMAND ----------
 
-from mcli import RunConfig, RunStatus
+from databricks.model_training import foundation_model as fm
 
-run = mcli.create_finetuning_run(
+run = fm.create(
     model=base_model,
-    train_data_path=f"dbfs:{data_path}/train.jsonl",
-    eval_data_path=f"dbfs:{data_path}/val.jsonl",
-    save_folder="dbfs:/databricks/mlflow-tracking/{mlflow_experiment_id}/{mlflow_run_id}/artifacts/",
-    task_type="INSTRUCTION_FINETUNE",
+    train_data_path=train_data_path,
+    # task_type='INSTRUCTION_FINETUNE',
+    task_type='CHAT_COMPLETION',
+    register_to=f'{catalog}.{schema}',
     training_duration=training_duration,
     learning_rate=learning_rate,
-    experiment_tracker={
-        "mlflow": {
-            "experiment_path": "/Shared/e2e_finreg_domain_adaptation_mosaic",
-            "model_registry_path": "msh.finreg.crr_llama7b_ift_v1",
-        }
-    },
-    disable_credentials_check=True,
-    custom_weights_path=custom_weights_path,
-)
-print(f"Started Run {run.name}. The run is in status {run.status}.")
+  )
 
 # COMMAND ----------
 
-mcli.wait_for_run_status(run.name, RunStatus.RUNNING)
-for s in mcli.follow_run_logs(run.name):
-    print(s)
+fm.get_events(run, follow=True)
 
 # COMMAND ----------
+
+latest_runs = fm.list(limit=2)
+latest_runs
+
+# COMMAND ----------
+
+
