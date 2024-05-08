@@ -98,36 +98,3 @@ fm.get_events(run, follow=True)
 
 latest_runs = fm.list(limit=2)
 latest_runs
-
-# COMMAND ----------
-
-# mcli.initialize(api_key=get_dbutils().secrets.get(scope=secrets_scope, key="mosaic-token"))
-
-
-# COMMAND ----------
-
-# from mcli import RunStatus
-
-# run = mcli.create_finetuning_run(
-#     model="meta-llama/Llama-2-7b-hf",
-#     train_data_path=f"dbfs:{train_data_path}",
-#     eval_data_path=f"dbfs:{val_data_path}",
-#     save_folder="dbfs:/databricks/mlflow-tracking/{mlflow_experiment_id}/{mlflow_run_id}/artifacts/",
-#     task_type="CONTINUED_PRETRAIN",
-#     training_duration=training_duration,
-#     learning_rate=learning_rate,
-#     experiment_tracker={
-#         "mlflow": {
-#             "experiment_path": f"{experiment_path}/e2e_finreg_domain_adaptation_mosaic",
-#             "model_registry_path": f"{catalog}.{schema}.crr_mpt7b8k_cpt_v1",
-#         }
-#     },
-#     disable_credentials_check=True,
-# )
-# print(f"Started Run {run.name}. The run is in status {run.status}.")
-
-# COMMAND ----------
-
-# mcli.wait_for_run_status(run.name, RunStatus.RUNNING)
-# for s in mcli.follow_run_logs(run.name):
-#     print(s)
