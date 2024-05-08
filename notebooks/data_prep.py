@@ -8,7 +8,7 @@
 
 # COMMAND ----------
 
-# spark.sql(f"CREATE CATALOG IF NOT EXISTS {catalog}")
+spark.sql(f"CREATE CATALOG IF NOT EXISTS {catalog}")
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog}.{schema}")
 spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog}.{schema}.{volume_name}")
 
@@ -21,7 +21,7 @@ from finreganalytics.utils import get_spark
 # COMMAND ----------
 
 download_pdfs = [
-  "https://i2.res.24o.it/pdf2010/S24/Documenti/2023/12/15/AllegatiPDF/RAEE_2023_completo.pdf"
+    # TODO: Add the URLS of pdfs you want to download.
 ]
 
 import requests
