@@ -24,7 +24,7 @@ mcli.initialize(api_key=get_dbutils().secrets.get(scope="msh", key="mosaic-token
 
 from mcli import RunConfig, RunStatus
 
-yaml_config = "../yamls/crr-finreg-ift-mistral7b-v1.yaml"
+yaml_config = "../yamls/crr-finreg-ift-mpt7b8k-v1.yaml"
 run = mcli.create_run(RunConfig.from_file(yaml_config))
 print(f"Started Run {run.name}. The run is in status {run.status}.")
 
@@ -33,5 +33,3 @@ print(f"Started Run {run.name}. The run is in status {run.status}.")
 mcli.wait_for_run_status(run.name, RunStatus.RUNNING)
 for s in mcli.follow_run_logs(run.name):
     print(s)
-
-# COMMAND ----------
