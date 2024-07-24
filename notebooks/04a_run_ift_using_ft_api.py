@@ -15,35 +15,14 @@
 # COMMAND ----------
 
 import os.path
-# import mcli
-from databricks_genai import finetuning as ft
+
+from databricks.model_training import foundation_model as fm
 
 from finreganalytics.utils import setup_logging, get_dbutils
 
 setup_logging()
 
-SUPPORTED_INPUT_MODELS = [
-    "mosaicml/mpt-30b",
-    "mosaicml/mpt-7b-8k",
-    "mosaicml/mpt-30b-instruct",
-    "mosaicml/mpt-7b-8k-instruct",
-    "mistralai/Mistral-7B-Instruct-v0.2",
-    "mistralai/Mistral-7B-v0.1",
-    "mistralai/Mixtral-8x7B-v0.1",
-    "mistralai/Mixtral-8x7B-Instruct-v0.1",
-    "meta-llama/Llama-2-7b-chat-hf",
-    "meta-llama/Llama-2-13b-chat-hf",
-    "meta-llama/Llama-2-70b-chat-hf",
-    "meta-llama/Llama-2-7b-hf",
-    "meta-llama/Llama-2-13b-hf",
-    "meta-llama/Llama-2-70b-hf",
-    "codellama/CodeLlama-7b-hf",
-    "codellama/CodeLlama-13b-hf",
-    "codellama/CodeLlama-34b-hf",
-    "codellama/CodeLlama-7b-Instruct-hf",
-    "codellama/CodeLlama-13b-Instruct-hf",
-    "codellama/CodeLlama-34b-Instruct-hf",
-]
+SUPPORTED_INPUT_MODELS = fm.get_models().to_pandas()["name"].to_list()
 get_dbutils().widgets.combobox(
     "base_model", "mistralai/Mistral-7B-v0.1", SUPPORTED_INPUT_MODELS, "base_model"
 )
@@ -71,7 +50,7 @@ if len(custom_weights_path) < 1:
 
 # COMMAND ----------
 
-run = ft.create(
+run = fm.create(
   model=base_model,
   train_data_path=f"{data_path}/train.jsonl",
   eval_data_path=f"{data_path}/val.jsonl",
@@ -84,7 +63,7 @@ run = ft.create(
 
 # COMMAND ----------
 
-display(ft.get_events(run))
+display(fm.get_events(run))
 
 # COMMAND ----------
 
@@ -92,4 +71,4 @@ run.name
 
 # COMMAND ----------
 
-display(ft.list(limit=3))
+display(fm.list())
